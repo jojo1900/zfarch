@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>slot-machine</title>
+    <style>
+      @keyframes rowup {
+        0% {
+          background-position-y: 0;
+          filter: blur(0);
+        }
+        50% {
+          /* background-position-y: 3000px; */
+          /* filter: blur(4px); */
+        }
+        100% {
+          background-position-y: 4000px;
+          filter: blur(0px);
+        }
+      }
+      .slot {
+        width: 86px;
+        height: 70px;
+        background-image: url(https://odhyan.com/slot/images/reel_normal.png);
+        /* background-image: url(https://odhyan.com/slot/images/reel_blur.png); */
+        /* background-repeat: repeat-y; */
+        background-position-y: 0px;
+        will-change: auto;
+        /* animation: 6s rowup linear infinite normal; */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slot"></div>
+    <div class="btn">开始</div>
+  </body>
+  <script>
+    const startBtn = document.querySelector('.btn');
+    const slot = document.querySelector('.slot');
+    let positionY = 0;
+    const maxSpeed = 20;
+    let rate = 0;
+    let reachMaxFlag = false;
+    const canStopRate = 0.1;
+    startBtn.addEventListener('click', function loop() {
+      requestAnimationFrame(() => {
+        if (rate >= maxSpeed) {
+          reachMaxFlag = true;
+        }
+        if (reachMaxFlag) {
+          rate -= 0.05;
+        } else {
+          rate = Math.min(maxSpeed, rate + 0.1);
+        }
+        if (rate <= 0) {
+          rate = 0;
+        }
+        // console.log(rate);
+        positionY += rate;
+        slot.style.backgroundPositionY = `${positionY}px`;
+        slot.style.filter = `blur(2px)`;
+        loop();
+      });
+    });
+    startBtn.click();
+  </script>
+</html>
