@@ -5,14 +5,47 @@
 //5.一个promise 可以 then 多次。
 //6.走向失败状态有两种情况：1.reject，2.用户抛出异常
 
-const PENDING = 'PENDING';
-const FULFILLED = 'FULFILLED';
-const REJECTED = 'REJECTED';
-
+const PENDING = "PENDING";
+const FULFILLED = "FULFILLED";
+const REJECTED = "REJECTED";
+function resolvePromise(x, promise, resolve, reject) {
+  if (x === promise) {
+    return reject(new TypeError("循环引用"));
+  }
+  if ((x && typeof x === "object") || typeof x === "function") {
+    let called;
+    try {
+      let then = x.then;
+      if (typeof then === "function") {
+        then.call(
+          x,
+          (y) => {
+            if (called) return;
+            called = true;
+            resolvePromise(y, promise2, resolve, reject);
+          },
+          (r) => {
+            if (called) return;
+            called = true;
+            reject(r);
+          }
+        );
+      } else {
+        resolve(x);
+      }
+    } catch (error) {
+      if (called) return;
+      called = true;
+      reject(error);
+    }
+  } else {
+    resolve(x);
+  }
+}
 class Promise {
   constructor(executor) {
     this.status = PENDING;
-    this.value = 'init';
+    this.value = undefined;
     this.reason = undefined;
     this.onResolveCbs = [];
     this.onRejectCbs = [];
@@ -27,7 +60,6 @@ class Promise {
         });
       }
     };
-    console.log('my promise');
     const reject = (reason) => {
       if (this.status === PENDING) {
         this.status = REJECTED;
@@ -55,13 +87,21 @@ class Promise {
 
   //then如何实现promise： return new Promise。
   then(onFullFilled, onRejected) {
+    onFullFilled =
+      typeof onFullFilled === "function" ? onFullFilled : (data) => data;
+    onRejected =
+      typeof onRejected === "function"
+        ? onRejected
+        : (err) => {
+            throw err;
+          };
     //每次调用then，返回一个新的promise
     let promise2 = new Promise((resolve, reject) => {
       if (this.status === FULFILLED) {
         try {
           setTimeout(() => {
             let x = onFullFilled(this.value);
-            resolve(x);
+            resolvePromise(x, promise2, resolve, reject);
           });
         } catch (error) {
           reject(error);
@@ -72,7 +112,7 @@ class Promise {
           setTimeout(() => {
             let x = onRejected(this.reason);
             //如果返回的是一个普通值，即使是失败回调返回的，也走成功
-            resolve(x);
+            resolvePromise(x, promise2, resolve, reject);
           });
         } catch (error) {
           reject(error);
@@ -83,17 +123,18 @@ class Promise {
           setTimeout(() => {
             this.onResolveCbs.push(() => {
               let x = onFullFilled(this.value);
-              resolve(x);
+              resolvePromise(x, promise2, resolve, reject);
             });
             this.onRejectCbs.push(() => {
               let x = onRejected(this.reason);
-              resolve(x);
+              resolvePromise(x, promise2, resolve, reject);
             });
           });
         } catch (error) {
           reject(error);
         }
       }
+      console.log(this, "this");
     });
     return promise2;
   }
