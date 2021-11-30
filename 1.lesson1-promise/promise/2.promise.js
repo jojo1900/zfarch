@@ -5,22 +5,22 @@
 //5.一个promise 可以 then 多次。
 //6.走向失败状态有两种情况：1.reject，2.用户抛出异常
 
-const PENDING = 'PENDING';
-const FULFILLED = 'FULFILLED';
-const REJECTED = 'REJECTED';
+const PENDING = "PENDING";
+const FULFILLED = "FULFILLED";
+const REJECTED = "REJECTED";
 function resolvePromise(x, promise, resolve, reject) {
   //循环解析，抛错出去，走下一个then的onReject
   if (x === promise) {
-    return reject(new TypeError('Chaining cycle detected for promise'));
+    return reject(new TypeError("Chaining cycle detected for promise"));
   }
   //如果是对象
-  if ((x && typeof x === 'object') || typeof x === 'function') {
+  if ((x && typeof x === "object") || typeof x === "function") {
     //如果是x 是promise，那么继续解析
     try {
       let then = x.then;
       //如果then是一个函数,那么任务x是个promise,需要拿到这个promise的结果。
       //通过调用这个promise的then，来拿到结果，如果是走onResolve方法，继续解析，如果是走onReject方法，reject。
-      if (typeof then === 'function') {
+      if (typeof then === "function") {
         then.call(
           x,
           (y) => {
@@ -46,9 +46,11 @@ function resolvePromise(x, promise, resolve, reject) {
 class Promise {
   constructor(executor) {
     this.status = PENDING;
-    this.value = 'init';
+    this.value = undefined;
     this.reason = undefined;
+    ß;
     this.onResolveCbs = [];
+    ß;
     this.onRejectCbs = [];
     const resolve = (value) => {
       if (this.status === PENDING) {
@@ -61,7 +63,6 @@ class Promise {
         });
       }
     };
-    console.log('my promise');
     const reject = (reason) => {
       if (this.status === PENDING) {
         this.status = REJECTED;
@@ -89,12 +90,20 @@ class Promise {
 
   //then如何实现promise： return new Promise。
   then(onFullFilled, onRejected) {
+    onFullFilled =
+      typeof onFullFilled === "function" ? onFullFilled : (data) => data;
+    onRejected =
+      typeof onRejected === "function"
+        ? onRejected
+        : (err) => {
+            throw err;
+          };
     //每次调用then，返回一个新的promise
     //onFullFilled,可传可不传，如果不是函数，需要自己补，要求能把值传到最后一个then中
     //onRejected,可传可不传，如果不是函数，需要自己补，要求能最后一个then，能捕获到错误
-    onFullFilled = typeof onFullFilled === 'function' ? onFullFilled : (v) => v;
+    onFullFilled = typeof onFullFilled === "function" ? onFullFilled : (v) => v;
     onRejected =
-      typeof onRejected === 'function'
+      typeof onRejected === "function"
         ? onRejected
         : (e) => {
             throw e;
@@ -137,6 +146,7 @@ class Promise {
           reject(error);
         }
       }
+      console.log(this, "this");
     });
     return promise2;
   }

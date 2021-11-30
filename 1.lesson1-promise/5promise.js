@@ -1,15 +1,22 @@
-let p = new Promise((resolve, reject) => {
-  console.log(2);
-  // reject('fail');
-  resolve(4);
-});
+const myPromise = require("./promise/2.promise");
 
+const p = new Promise((resolve, reject) => {
+  reject(100);
+});
 p.then(
-  (value) => {
-    console.log(value);
+  (data) => {
+    console.log("success", data);
+    return data;
   },
   (reason) => {
-    console.log(reason);
+    console.log("reject", reason);
+    return Promise.reject(reason);
+  }
+).then(
+  (data) => {
+    console.log(data, "ss");
+  },
+  (reason) => {
+    console.log(reason, "rrr");
   }
 );
-console.log(3);
