@@ -25,5 +25,5 @@ console.log(path.basename(__filename, '.js'));
 //vm虚拟机模块
 
 //安全执行。不拿字符串外部的变量
-var a = 100;
-vm.runInThisContext('console.log(a)');
+// var a = 100;
+// vm.runInThisContext('console.log(a)');
